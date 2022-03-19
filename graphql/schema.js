@@ -13,6 +13,7 @@ module.exports = buildSchema(`
     input UserLoginInputData {
         email : String!
         password : String!
+        rememberMe : Boolean
     }
     input UserRegInputData {
         email : String!
@@ -25,7 +26,7 @@ module.exports = buildSchema(`
        loginUser (userLoginInput : UserLoginInputData) : User!
     }
     type rootQuery {
-        hello : String
+        jwtUser : User!
     }
     schema {
         query : rootQuery

@@ -21,7 +21,10 @@ app.use("/", express.static(path.join(__dirname, "public")));
 //graphQL API
 const graphQLSchema = require("./graphql/schema");
 const graphQLResolver = require("./graphql/resolvers");
-
+const { isAuthenticated } = require("./middleware/auth");
+//authentications
+app.use(isAuthenticated);
+//graphql API
 app.use(
   "/api/v1/graphql",
   graphqlHTTP({
