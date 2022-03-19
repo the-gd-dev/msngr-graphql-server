@@ -6,6 +6,9 @@ const userSchema = new Schema(
       type: String,
       require: true,
     },
+    profilePicture: {
+      type: String,
+    },
     email: {
       type: String,
       require: true,
@@ -13,9 +16,9 @@ const userSchema = new Schema(
     password: {
       type: String,
       require: true,
-    }
-    // conversations: [{ type: Schema.Types.ObjectId, ref: "Conversation" }],
-    // groups: [{ type: Schema.Types.ObjectId, ref: "Groups" }],
+    },
+    conversations: [{ type: Schema.Types.ObjectId, ref: "Conversation" }],
+    groups: [{ type: Schema.Types.ObjectId, ref: "Groups" }],
   },
   { timestamps: true }
 );
