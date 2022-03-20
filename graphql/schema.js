@@ -11,6 +11,22 @@ module.exports = buildSchema(`
         createdAt : String
         updatedAt  : String
     }
+    type Message {
+        _id : ID
+        text : String
+        image : String
+        reaction : String
+        createdAt : String
+        updatedAt  : String
+    }
+    type Conversation {
+        _id : ID
+        participents : [User!]
+        unread : Boolean!
+        lastMessage : Message!
+        createdAt : String
+        updatedAt  : String
+    }
     input UserLoginInputData {
         email : String!
         password : String!
@@ -22,13 +38,22 @@ module.exports = buildSchema(`
         password : String!
         confirmPassword : String!
     }
+    input messageInputData {
+        conversationId : String
+        text : String
+        image  : String
+        sender : String!
+        reciever : String!
+    }
     type rootMutation {
+       createMessage (messageInput : messageInputData) : Message! 
        createUser (userRegInput : UserRegInputData) : User!
        loginUser (userLoginInput : UserLoginInputData) : User!
     }
     type rootQuery {
         searchUsers(query : String) : [User]
         jwtUser : User!
+        getConversations : [Conversation]
     }
     schema {
         query : rootQuery

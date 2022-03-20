@@ -2,17 +2,73 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const userDataValidations = require("../validations/user");
 const jwt = require("jsonwebtoken");
+const Conversation = require("../models/Conversation");
+const Message = require("../models/Message");
 module.exports = {
+  /**
+   * create a new message
+   * @param {*} param0
+   * @param {*} req
+   */
+  createMessage: async function ({ messageInput }, req) {
+    try {
+      let { text, image, sender, reciever } = messageInput;
+      let convo = await Conversation.findOne({
+        participents: { $in: [sender, reciever] },
+      });
+      if (!convo) {
+        convo = await Conversation.create({
+          participents: [sender, reciever],
+        });
+      }
+      //create new message
+      let message = await Message.create({
+        conversationId: convo._id,
+        text: text,
+        image: "",
+        reaction: "",
+      });
+      await Conversation.findById(convo._id).updateOne({
+        lastMessage: message._id,
+      });
+      let newMessage = await Message.findById(message._id);
+      return {
+        ...newMessage._doc,
+        _id: newMessage._doc._id.toString(),
+        createdAt: newMessage._doc.createdAt.toISOString(),
+        updatedAt: newMessage._doc.updatedAt.toISOString(),
+      };
+    } catch (error) {
+      throw error;
+    }
+  },
   /**
    * Searching the user by name
    * @param {*} _
-   * @param {*} param1
+   * @param {*} param0
    */
   searchUsers: async function ({ query }, req) {
     return await User.find({
       name: { $regex: new RegExp("^" + query.toLowerCase(), "i") },
       _id: { $ne: req.authUserId },
     });
+  },
+  /**
+   * get logged in user conversations
+   * @param {*} data
+   * @param {*} req
+   * @returns
+   */
+  getConversations: async function (data, req) {
+    return await Conversation.find({
+      participents: {
+        $in: [req.authUserId],
+      },
+    })
+      .populate("lastMessage")
+      .populate("participents")
+      .sort({ updatedAt: "desc" })
+      .exec();
   },
   /**
    * return jwt verified user
