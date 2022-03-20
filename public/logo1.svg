@@ -9,7 +9,7 @@
             <stop stop-color="#FF7061" offset="100%"></stop>
         </radialGradient>
     </defs>
-    <g id="logo" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+    <g id="logo" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
         <rect id="bounding-box" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="1024" height="1024"></rect>
         <g id="logo">
             <path d="M512,122 C286.668,122 112,287.056 112,510 C112,626.6144 159.792,727.3824 237.6224,796.984 C244.156,802.832 248.1,811.024 248.368,819.792 L250.5464,890.944 C251.2424,913.64 274.6856,928.408 295.4536,919.24 L374.848,884.192 C381.5784,881.224 389.12,880.672 396.212,882.624 C432.696,892.656 471.5264,898 512,898 C737.332,898 912,732.944 912,510 C912,287.056 737.332,122 512,122 Z" id="Path" fill="url(#radialGradient-1)"></path>

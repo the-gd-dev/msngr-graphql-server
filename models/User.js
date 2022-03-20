@@ -8,6 +8,7 @@ const userSchema = new Schema(
     },
     profilePicture: {
       type: String,
+      default: "",
     },
     email: {
       type: String,

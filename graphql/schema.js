@@ -7,6 +7,7 @@ module.exports = buildSchema(`
         email : String!
         password : String
         token : String
+        profilePicture : String
         createdAt : String
         updatedAt  : String
     }
@@ -26,6 +27,7 @@ module.exports = buildSchema(`
        loginUser (userLoginInput : UserLoginInputData) : User!
     }
     type rootQuery {
+        searchUsers(query : String) : [User]
         jwtUser : User!
     }
     schema {

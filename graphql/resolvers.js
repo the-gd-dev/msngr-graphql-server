@@ -4,6 +4,17 @@ const userDataValidations = require("../validations/user");
 const jwt = require("jsonwebtoken");
 module.exports = {
   /**
+   * Searching the user by name
+   * @param {*} _
+   * @param {*} param1
+   */
+  searchUsers: async function ({ query }, req) {
+    return await User.find({
+      name: { $regex: new RegExp("^" + query.toLowerCase(), "i") },
+      _id: { $ne: req.authUserId },
+    });
+  },
+  /**
    * return jwt verified user
    * @param {*} data
    * @param {*} req
@@ -71,7 +82,7 @@ module.exports = {
       }
       let userId = userExist._doc._id.toString();
       const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
-        expiresIn: rememberMe ? "15d" : "2h",
+        expiresIn: rememberMe ? "360h" : "2h",
       });
       return {
         token: token,
