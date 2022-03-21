@@ -24,6 +24,7 @@ module.exports = {
       //create new message
       let message = await Message.create({
         conversationId: convo._id,
+        senderId : sender,
         text: text,
         image: "",
         reaction: "",
@@ -69,6 +70,16 @@ module.exports = {
       .populate("participents")
       .sort({ updatedAt: "desc" })
       .exec();
+  },
+  /**
+   * fetch messages for given convesation
+   * @param {*} param0
+   * @param {*} req
+   */
+  getMessages: async function ({ conversationId }, req) {
+    return await Message.find({ conversationId: conversationId })
+      .populate("conversationId")
+      .sort({ createdAt: "DESC" });
   },
   /**
    * return jwt verified user

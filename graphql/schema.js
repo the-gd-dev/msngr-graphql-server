@@ -13,6 +13,7 @@ module.exports = buildSchema(`
     }
     type Message {
         _id : ID
+        senderId : User
         text : String
         image : String
         reaction : String
@@ -54,6 +55,7 @@ module.exports = buildSchema(`
         searchUsers(query : String) : [User]
         jwtUser : User!
         getConversations : [Conversation]
+        getMessages(conversationId : String) : [Message]
     }
     schema {
         query : rootQuery

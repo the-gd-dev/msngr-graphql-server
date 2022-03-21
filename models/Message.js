@@ -15,6 +15,10 @@ const messageSchema = new Schema(
     reaction: {
       type: String,
     },
+    senderId : {
+      type : Schema.Types.ObjectId,
+      ref : 'User'
+    },
     replyToMessage: {
       type: Schema.Types.ObjectId,
       ref: "Message",
