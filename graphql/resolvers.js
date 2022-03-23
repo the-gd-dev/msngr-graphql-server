@@ -14,7 +14,7 @@ module.exports = {
     try {
       let { text, image, sender, reciever } = messageInput;
       let convo = await Conversation.findOne({
-        participents: { $in: [sender, reciever] },
+        participents: { $all: [sender, reciever] },
       });
       if (!convo) {
         convo = await Conversation.create({
@@ -68,7 +68,6 @@ module.exports = {
     })
       .populate("lastMessage")
       .populate("participents")
-      .sort({ updatedAt: "desc" })
       .exec();
   },
   /**
