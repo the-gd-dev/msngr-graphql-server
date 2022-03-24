@@ -24,7 +24,7 @@ module.exports = {
       //create new message
       let message = await Message.create({
         conversationId: convo._id,
-        senderId : sender,
+        senderId: sender,
         text: text,
         image: "",
         reaction: "",
@@ -76,9 +76,16 @@ module.exports = {
    * @param {*} req
    */
   getMessages: async function ({ conversationId }, req) {
-    return await Message.find({ conversationId: conversationId })
+    const msgs = await Message.find({ conversationId: conversationId })
       .populate("conversationId")
-      .sort({ createdAt: "DESC" });
+      .sort({ createdAt: 1 });
+    let messages = msgs.map((m) => {
+      return {
+        ...m._doc,
+        createdAt: m._doc.createdAt.toISOString(),
+      };
+    });
+    return messages;
   },
   /**
    * return jwt verified user
