@@ -16,6 +16,7 @@ module.exports = buildSchema(`
         senderId : User
         text : String
         image : String
+        replyToMessage : Message
         reaction : String
         createdAt : String
         updatedAt  : String
@@ -40,6 +41,7 @@ module.exports = buildSchema(`
         confirmPassword : String!
     }
     input messageInputData {
+        replyingMsg : String
         conversationId : String
         text : String
         image  : String
@@ -47,7 +49,9 @@ module.exports = buildSchema(`
         reciever : String!
     }
     type rootMutation {
+       deleteConversations (conversationId : String) : Conversation! 
        createMessage (messageInput : messageInputData) : Message! 
+       deleteMessage (messageId : String) : Message! 
        createUser (userRegInput : UserRegInputData) : User!
        loginUser (userLoginInput : UserLoginInputData) : User!
     }

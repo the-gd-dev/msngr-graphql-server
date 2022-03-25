@@ -6,18 +6,24 @@ const messageSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Conversation",
     },
-    text: {
-      type: String,
+    text: String,
+    image:String,
+    reaction: String,
+    senderId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
     },
-    image: {
-      type: String,
+    isRead: {
+      type: Boolean,
+      default: false,
     },
-    reaction: {
-      type: String,
-    },
-    senderId : {
-      type : Schema.Types.ObjectId,
-      ref : 'User'
+    deletedBy: [{
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    }],
+    unsendMessage: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
     },
     replyToMessage: {
       type: Schema.Types.ObjectId,

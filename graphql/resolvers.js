@@ -12,11 +12,13 @@ module.exports = {
    */
   createMessage: async function ({ messageInput }, req) {
     try {
-      let { text, image, sender, reciever } = messageInput;
+      let { text, image, sender, reciever, replyingMsg } = messageInput;
+      //find conversation if exist
       let convo = await Conversation.findOne({
         participents: { $all: [sender, reciever] },
       });
       if (!convo) {
+        //create conversation if not exist
         convo = await Conversation.create({
           participents: [sender, reciever],
         });
@@ -28,11 +30,44 @@ module.exports = {
         text: text,
         image: "",
         reaction: "",
+        replyToMessage: replyingMsg,
       });
+
+      //update conversation's last time.
       await Conversation.findById(convo._id).updateOne({
         lastMessage: message._id,
       });
-      let newMessage = await Message.findById(message._id);
+
+      //update conversationIds to User
+      let senderUser = await User.findById(sender);
+      let receiverUser = await User.findById(reciever);
+      if (senderUser) {
+        if (!senderUser._doc.conversations.includes(convo._id)) {
+          let conversationsUpdated = [
+            ...senderUser._doc.conversations,
+            convo._id,
+          ];
+          await User.findById(sender).updateOne({
+            conversations: conversationsUpdated,
+          });
+        }
+      }
+      if (receiverUser) {
+        if (!receiverUser._doc.conversations.includes(convo._id)) {
+          let conversationsUpdated = [
+            ...receiverUser._doc.conversations,
+            convo._id,
+          ];
+          await User.findById(reciever).updateOne({
+            conversations: conversationsUpdated,
+          });
+        }
+      }
+
+      //return created message
+      let newMessage = await Message.findById(message._id)
+        .populate("replyToMessage")
+        .exec();
       return {
         ...newMessage._doc,
         _id: newMessage._doc._id.toString(),
@@ -42,6 +77,19 @@ module.exports = {
     } catch (error) {
       throw error;
     }
+  },
+  /**
+   * delete a new message
+   * @param {*} param0
+   * @param {*} req
+   */
+  deleteMessage: async function ({ messageId }, req) {
+    let messageFound = await Message.findById(messageId);
+    await messageFound.deleteOne();
+    return {
+      ...messageFound._doc,
+      createdAt: messageFound._doc.createdAt.toISOString(),
+    };
   },
   /**
    * Searching the user by name
@@ -71,14 +119,25 @@ module.exports = {
       .exec();
   },
   /**
+   * get logged in user conversations
+   * @param {*} data
+   * @param {*} req
+   * @returns
+   */
+  deleteConversations: async function ({ conversationId }, req) {},
+  /**
    * fetch messages for given convesation
    * @param {*} param0
    * @param {*} req
    */
   getMessages: async function ({ conversationId }, req) {
-    const msgs = await Message.find({ conversationId: conversationId })
+    const msgs = await Message.find({
+      conversationId: conversationId,
+      deletedBy: { $nin: [req.authUserId] },
+    })
       .populate("conversationId")
       .sort({ createdAt: 1 });
+
     let messages = msgs.map((m) => {
       return {
         ...m._doc,
