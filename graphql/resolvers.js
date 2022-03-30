@@ -33,9 +33,11 @@ module.exports = {
         replyToMessage: replyingMsg,
       });
 
+      //revoke conversation if exists & deleted by either user
       //update conversation's last time.
       await Conversation.findById(convo._id).updateOne({
         lastMessage: message._id,
+        deletedBy: [],
       });
 
       //update conversationIds to User
@@ -63,7 +65,6 @@ module.exports = {
           });
         }
       }
-
       //return created message
       let newMessage = await Message.findById(message._id)
         .populate("replyToMessage")
@@ -85,7 +86,23 @@ module.exports = {
    */
   deleteMessage: async function ({ messageId }, req) {
     let messageFound = await Message.findById(messageId);
-    await messageFound.deleteOne();
+    let updatedDeletedMsgArr = messageFound.deletedBy || [];
+    if (
+      updatedDeletedMsgArr.length > 0 &&
+      !updatedDeletedMsgArr.includes(req.authUserId)
+    ) {
+      //if one user already deleted the message then destroy message
+      await Message.findById(messageId).deleteOne();
+    } else {
+      if (
+        updatedDeletedMsgArr &&
+        !updatedDeletedMsgArr.includes(req.authUserId)
+      ) {
+        await Message.findById(messageId).updateOne({
+          deletedBy: [...updatedDeletedMsgArr, req.authUserId],
+        });
+      }
+    }
     return {
       ...messageFound._doc,
       createdAt: messageFound._doc.createdAt.toISOString(),
@@ -113,6 +130,9 @@ module.exports = {
       participents: {
         $in: [req.authUserId],
       },
+      deletedBy: {
+        $nin: [req.authUserId],
+      },
     })
       .populate("lastMessage")
       .populate("participents")
@@ -124,7 +144,24 @@ module.exports = {
    * @param {*} req
    * @returns
    */
-  deleteConversations: async function ({ conversationId }, req) {},
+  deleteConversations: async function ({ conversationId }, req) {
+    let conversation = await Conversation.findById(conversationId);
+    if (conversation) {
+      let messages = await Message.find({
+        conversationId: conversationId,
+      });
+      messages.map(async (msg) => {
+        await this.deleteMessage({ messageId: msg._id }, req);
+      });
+      var deletedByArray = conversation.deletedBy || [];
+      if (!deletedByArray.includes(req.authUserId)) {
+        cnv = await Conversation.findById(conversationId).updateOne({
+          deletedBy: [...deletedByArray, req.authUserId],
+        });
+      }
+    }
+    return conversation;
+  },
   /**
    * fetch messages for given convesation
    * @param {*} param0
@@ -135,13 +172,15 @@ module.exports = {
       conversationId: conversationId,
       deletedBy: { $nin: [req.authUserId] },
     })
-      .populate("conversationId")
-      .sort({ createdAt: 1 });
+      .populate("replyToMessage")
+      .sort({ createdAt: 1 })
+      .exec();
 
     let messages = msgs.map((m) => {
       return {
         ...m._doc,
         createdAt: m._doc.createdAt.toISOString(),
+        updatedAt: m._doc.updatedAt.toISOString(),
       };
     });
     return messages;

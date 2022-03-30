@@ -12,6 +12,12 @@ const conversationSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    deletedBy: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
     lastMessage: {
       type: Schema.Types.ObjectId,
       ref: "Message",
